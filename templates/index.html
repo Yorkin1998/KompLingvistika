@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Morfologik Tahlil</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container py-5">
+    <h2 class="text-center mb-4">So‘z Morfologik Tahlili</h2>
+    <div class="row justify-content-center mb-4">
+        <!-- Chap taraf: kiritish -->
+        <div class="col-md-5">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">So‘z kiriting</h5>
+                    <form method="post" action="">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <input type="text" class="form-control" name="word" placeholder="Masalan: mashinalar">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Tahlil qilish</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- O'ng taraf: natija -->
+        <div class="col-md-5">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Natija</h5>
+                    {% if root %}
+                        <p><strong>Asos:</strong> <span class="text-success">{{ root }}</span></p>
+                        <p><strong>Qo‘shimchalar:</strong> 
+                            {% if suffixes %}
+                                {% for i in suffixes %}
+                                <span class="badge bg-info text-dark">{{ i }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <span class="text-muted">Qo‘shimcha yo‘q</span>
+                            {% endif %}
+                        </p>
+                    {% else %}
+                        <p class="text-muted">So‘z kiritilgach natija shu yerda chiqadi.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pastki qism: Sistemadagi so‘zlar va qo‘shimchalar -->
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">📚 Sistemadagi so‘zlar</h5>
+                    {% if bazadagi %}
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for word in bazadagi %}
+                                <span class="badge bg-secondary">{{ word }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Hali so‘zlar kiritilmagan.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">🔗 Mavjud qo‘shimchalar</h5>
+                    {% if qoshimcha %}
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for suf in qoshimcha %}
+                                <span class="badge bg-warning text-dark">{{ suf }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Hali qo‘shimchalar mavjud emas.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
