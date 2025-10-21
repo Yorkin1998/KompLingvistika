@@ -34,6 +34,13 @@
                 <div class="card-body">
                     <h5 class="card-title">Natija</h5>
                     {% if root %}
+                        {% if result_html %}
+                        <p><strong>Turkum:</strong> 
+                            {% for i, j in result_html.items %}
+                            <span class="text-success">{{ i }} -> {{ j }}</span>
+                            {% endfor %}
+                        </p>
+                        {% endif %}
                         <p><strong>Asos:</strong> <span class="text-success">{{ root }}</span></p>
                         <p><strong>Qo‘shimchalar:</strong> 
                             {% if suffixes %}
