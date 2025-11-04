@@ -4,5 +4,13 @@ from django.contrib import admin
 from .models import UzWord, OT, SIFAT
 
 admin.site.register(UzWord)
-admin.site.register(OT)
-admin.site.register(SIFAT)
+
+@admin.register(OT)
+class OTadmin(admin.ModelAdmin):
+    list_display = ['id','word',]
+    search_fields = ['word']
+
+@admin.register(SIFAT)
+class SIFATadmin(admin.ModelAdmin):
+    list_display = ['id','word',]
+    search_fields = ['word']
