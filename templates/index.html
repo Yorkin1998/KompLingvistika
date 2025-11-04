@@ -28,37 +28,32 @@
             </div>
         </div>
 
-        <!-- O'ng taraf: natija -->
-        <div class="col-md-5">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Natija</h5>
-                    {% if root %}
-                        {% if result_html %}
-                        <p><strong>Turkum:</strong> 
-                            {% for i, j in result_html.items %}
-                            <span class="text-success">{{ i }} -> {{ j }}</span>
-                            {% endfor %}
-                        </p>
-                        {% endif %}
-                        <p><strong>Asos:</strong> <span class="text-success">{{ root }}</span></p>
-                        <p><strong>Qo‘shimchalar:</strong> 
-                            {% if suffixes %}
-                                {% for i in suffixes %}
-                                <span class="badge bg-info text-dark">{{ i }}</span>
-                                {% endfor %}
-                            {% else %}
-                                <span class="text-muted">Qo‘shimcha yo‘q</span>
-                            {% endif %}
-                        </p>
-                    {% else %}
-                        <p class="text-muted">So‘z kiritilgach natija shu yerda chiqadi.</p>
+    <!-- O'ng taraf: natija -->
+    <div class="col-md-5">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Natija</h5>
+                {% if root %}
+                    {% if word_class %}
+                        <p><strong>So‘z turkumi:</strong> <span class="text-primary">{{ word_class }}</span></p>
                     {% endif %}
-                </div>
+
+                    {% if result_html %}
+                    <p><strong>Turkum (POSTag saytidan):</strong> 
+                        {% for i, j in result_html.items %}
+                        <span class="text-success">{{ i }} -> {{ j }}</span>
+                        {% endfor %}
+                    </p>
+                    {% endif %}
+
+                    <p><strong>Asos:</strong> <span class="text-success">{{ root }}</span></p>
+                {% else %}
+                    <p class="text-muted">So‘z kiritilgach natija shu yerda chiqadi.</p>
+                {% endif %}
+
             </div>
         </div>
     </div>
-
     <!-- Pastki qism: Sistemadagi so‘zlar va qo‘shimchalar -->
     <div class="row">
         <div class="col-md-6 mb-3">
@@ -91,6 +86,14 @@
                     {% else %}
                         <p class="text-muted">Hali qo‘shimchalar mavjud emas.</p>
                     {% endif %}
+                    <br><br>
+                    {% if suffixes %}
+                        <h3>Topilgan qo‘shimchalar:</h3>
+                        {% for s in suffixes %}
+                            <strong>{{ s.suffix }} → {{ s.type }}</strong> <br>
+                        {% endfor %}
+                    {% endif %}
+
                 </div>
             </div>
         </div>
