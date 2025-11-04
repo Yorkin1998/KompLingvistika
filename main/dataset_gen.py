@@ -15,7 +15,44 @@ SUFFIXES = [
     "man", "san", "siz", "di", "dim", "ding", "dik", "gan", "gach"
 ]
 
+SUFFIX_TYPES = {
+    # Ko‘plik qo‘shimchalari
+    "lar": "ko‘plik qo‘shimchasi",
 
+    # Egalik qo‘shimchalari
+    "larimiz": "egalik qo‘shimchasi (1-shaxs ko‘plik)",
+    "larim": "egalik qo‘shimchasi (1-shaxs birlik)",
+    "lari": "egalik qo‘shimchasi (3-shaxs)",
+    "miz": "egalik qo‘shimchasi (1-shaxs ko‘plik)",
+    "imiz": "egalik qo‘shimchasi (1-shaxs ko‘plik)",
+    "ingiz": "egalik qo‘shimchasi (2-shaxs hurmat yoki ko‘plik)",
+    "im": "egalik qo‘shimchasi (1-shaxs birlik)",
+    "ing": "egalik qo‘shimchasi (2-shaxs birlik)",
+    "i": "egalik qo‘shimchasi (3-shaxs)",
+
+    # Kelishik qo‘shimchalari
+    "ni": "tushum kelishigi qo‘shimchasi",
+    "ga": "yo‘nalish kelishigi qo‘shimchasi",
+    "da": "joy kelishigi qo‘shimchasi",
+    "dan": "chiqish kelishigi qo‘shimchasi",
+    "ning": "qaratqich kelishigi qo‘shimchasi",
+
+    # Fe’l qo‘shimchalari (shaxs/son, zamon)
+    "man": "fe’l shaxs-son qo‘shimchasi (1-shaxs birlik)",
+    "san": "fe’l shaxs-son qo‘shimchasi (2-shaxs birlik)",
+    "siz": "fe’l shaxs-son qo‘shimchasi (2-shaxs hurmat yoki ko‘plik)",
+    "di": "fe’l o‘tgan zamon qo‘shimchasi (3-shaxs)",
+    "dim": "fe’l o‘tgan zamon qo‘shimchasi (1-shaxs birlik)",
+    "ding": "fe’l o‘tgan zamon qo‘shimchasi (2-shaxs birlik)",
+    "dik": "fe’l o‘tgan zamon qo‘shimchasi (1-shaxs ko‘plik)",
+
+    # Ravishdosh / fe’l qo‘shimchalari
+    "gan": "fe’l sifatdosh qo‘shimchasi",
+    "gach": "fe’l ravishdosh qo‘shimchasi (vaqt yoki shart bildiradi)",
+
+    # Boshqalar
+    "laridan": "ko‘plik + chiqish kelishigi birikmasi"
+}
 def generate_dataset(filename="uzbek_dataset.csv", limit_per_root=30):
     """
     Generate dataset with structure: word, root, suffixes (space separated if multiple)
