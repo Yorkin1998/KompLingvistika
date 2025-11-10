@@ -3,7 +3,7 @@ from django.core.cache import cache
 
 from os.path import exists
 
-from .models import UzWord, OT, SIFAT
+from .models import UzWord, UmumiyTurkum, SIFAT
 from .tests import SUFFIXES,BASE_WORDS, predict, generate_dataset, train_model
 
 import tempfile
@@ -67,23 +67,17 @@ def segment_view(request):
         train_model()
 
     result_html = None
-    suffixes = []
-    root = None
-    word_classes = None
     suffixes_with_type = []
-    word_class_final = None  # bu bizning filtrlangan natija
+    root = None
+    word_class_final = None
 
     if request.method == "POST":
         word = request.POST.get("word")
         if word:
-            if word not in BASE_WORDS:
-                add_new_word(word)
-
+            # 1️⃣ Avvalo, ildizni aniqlash uchun predict ishlaydi (suffixlar har doim kerak)
             root, found_suffixes = predict(word)
-
             if found_suffixes:
-                suffixes = found_suffixes
-                for s in suffixes:
+                for s in found_suffixes:
                     suffixes_with_type.append({
                         "suffix": s,
                         "type": SUFFIX_TYPES.get(s, "Noma’lum turdagi qo‘shimcha")
@@ -91,72 +85,80 @@ def segment_view(request):
             else:
                 suffixes_with_type = [{"suffix": "Mavjud emas!", "type": ""}]
 
-            text = word
+            # 2️⃣ Endi ildiz (root) bazada bor-yo‘qligini tekshiramiz
+            mavjud_turkum = None
+            if root:
+                mavjud_turkum = UmumiyTurkum.objects.filter(word__iexact=root).first()
 
-            tmp_dir = tempfile.mkdtemp()
-            options = webdriver.ChromeOptions()
-            options.add_argument("--headless")
-            options.add_argument("--no-sandbox")
-            options.add_argument("--disable-dev-shm-usage")
-            options.add_argument(f"--user-data-dir={tmp_dir}")
+            if mavjud_turkum:
+                # Agar ildiz bazada bo‘lsa, shu turkumdan foydalanamiz
+                turkum_nomi = dict(UmumiyTurkum.TURKUM).get(mavjud_turkum.type_is, "Noma’lum turkum")
+                word_class_final = f"{turkum_nomi} (bazadan olindi)"
+            else:
+                # 3️⃣ Aks holda — korpus orqali aniqlaymiz va bazaga yozamiz
+                text = root or word
+                tmp_dir = tempfile.mkdtemp()
+                options = webdriver.ChromeOptions()
+                options.add_argument("--headless")
+                options.add_argument("--no-sandbox")
+                options.add_argument("--disable-dev-shm-usage")
+                options.add_argument(f"--user-data-dir={tmp_dir}")
+                driver = webdriver.Chrome(options=options)
 
-            driver = webdriver.Chrome(options=options)
+                try:
+                    driver.get("https://uznatcorpara.uz/uz/POSTag")
 
-            try:
-                driver.get("https://uznatcorpara.uz/uz/POSTag")
+                    text_field = WebDriverWait(driver, 10).until(
+                        EC.presence_of_element_located((By.ID, "text"))
+                    )
+                    text_field.clear()
+                    text_field.send_keys(text)
 
-                text_field = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.ID, "text"))
-                )
-                text_field.clear()
-                text_field.send_keys(text)
+                    submit_button = driver.find_element(By.XPATH, "//button[@type='submit']")
+                    submit_button.click()
 
-                submit_button = driver.find_element(By.XPATH, "//button[@type='submit']")
-                submit_button.click()
+                    collapse = WebDriverWait(driver, 10).until(
+                        EC.presence_of_element_located((By.ID, "collapseTwo"))
+                    )
 
-                collapse = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.ID, "collapseTwo"))
-                )
+                    result_html = collapse.get_attribute("outerHTML")
+                    word_classes = parse_word_classes(result_html)
 
-                result_html = collapse.get_attribute("outerHTML")
-                word_classes = parse_word_classes(result_html)
-                
-                if word_classes:
-                    # 1-so‘zning turkumini olamiz
-                    first_class = list(word_classes.values())[0]
-
-                    if "Ot" in first_class:
-                        word_class_final = "Ot (ot so‘z turkumi)"
-                        if OT.objects.filter(word = word).exists():
-                            pass
+                    if word_classes:
+                        first_class = list(word_classes.values())[0]
+                        if "Ot" in first_class:
+                            word_class_final = "Ot (ot so‘z turkumi)"
+                            UmumiyTurkum.objects.create(word=text, type_is='1')
+                        elif "Sifat" in first_class:
+                            word_class_final = "Sifat (sifat so‘z turkumi)"
+                            UmumiyTurkum.objects.create(word=text, type_is='2')
+                        elif "Son" in first_class:
+                            word_class_final = "Son (son so‘z turkumi)"
+                            UmumiyTurkum.objects.create(word=text, type_is='3')
+                        elif "Fe’l" in first_class or "Fe'l" in first_class:
+                            word_class_final = "Fe’l (fe’l so‘z turkumi)"
+                            UmumiyTurkum.objects.create(word=text, type_is='4')
+                        elif "Ravish" in first_class:
+                            word_class_final = "Ravish (ravish so‘z turkumi)"
+                            UmumiyTurkum.objects.create(word=text, type_is='5')
+                        elif "Olmosh" in first_class:
+                            word_class_final = "Olmosh (olmosh so‘z turkumi)"
+                            UmumiyTurkum.objects.create(word=text, type_is='6')
                         else:
-                            OT.objects.create(
-                                word = word
-                            )
-                    elif "Sifat" in first_class:
-                        if SIFAT.objects.filter(word = word).exists():
-                            pass
-                        else:
-                            SIFAT.objects.create(
-                                word = word
-                            )
-                        word_class_final = "Sifat (sifat so‘z turkumi)"
+                            word_class_final = "Noaniq turkum"
                     else:
                         word_class_final = "Noaniq turkum"
-                else:
+
+                except Exception as e:
+                    result_html = f"<p style='color:red;'>Xatolik yuz berdi: {e}</p>"
                     word_class_final = "Noaniq turkum"
-
-
-            except Exception as e:
-                result_html = f"<p style='color:red;'>Xatolik yuz berdi: {e}</p>"
-                word_class_final = "Noaniq turkum"
-            finally:
-                driver.quit()
+                finally:
+                    driver.quit()
 
     return render(request, "index.html", {
         "root": root,
         "suffixes": suffixes_with_type,
+        "word_class": word_class_final,
         "bazadagi": BASE_WORDS,
         "qoshimcha": SUFFIX_TYPES,
-        "word_class": word_class_final  
     })

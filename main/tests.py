@@ -13,7 +13,7 @@ BASE_WORDS = [
 ]
 
 SUFFIXES = [
-    "lar", "larimiz", "larim", "lari", "laridan", "miz", "imiz", "ingiz",
+    "lar", "lari", "miz", "imiz", "ingiz",
     "im", "ing", "i", "ni", "ga", "da", "dan", "ning",
     "man", "san", "siz", "di", "dim", "ding", "dik", "gan", "gach", "gi"
 ]
