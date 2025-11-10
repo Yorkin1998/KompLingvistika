@@ -28,3 +28,19 @@ class GIVENTEXT(models.Model):
 
     def __str__(self):
         return self.text
+    
+class UmumiyTurkum(models.Model):
+
+    TURKUM = (
+        ('1', 'OT'),
+        ('2', 'SIFAT'),
+        ('3', 'SON'),
+        ('4', "FE'L"),
+        ('5', 'RAVISH'),
+        ('6', 'OLMOSH')
+    )
+    word = models.CharField(max_length = 100)
+    type_is = models.CharField(max_length=1,choices=TURKUM, null=True, blank=True)
+
+    def __str__(self):
+        return self.word

@@ -38,8 +38,6 @@ def parse_word_classes(result_html):
 
 SUFFIX_TYPES = {
     "lar": "ko‘plik qo‘shimchasi",
-    "larimiz": "egalik qo‘shimchasi (1-shaxs ko‘plik)",
-    "larim": "egalik qo‘shimchasi (1-shaxs birlik)",
     "lari": "egalik qo‘shimchasi (3-shaxs)",
     "miz": "egalik qo‘shimchasi (1-shaxs ko‘plik)",
     "imiz": "egalik qo‘shimchasi (1-shaxs ko‘plik)",
@@ -61,7 +59,6 @@ SUFFIX_TYPES = {
     "dik": "fe’l o‘tgan zamon qo‘shimchasi (1-shaxs ko‘plik)",
     "gan": "fe’l sifatdosh qo‘shimchasi",
     "gach": "fe’l ravishdosh qo‘shimchasi (vaqt yoki shart bildiradi)",
-    "laridan": "ko‘plik + chiqish kelishigi birikmasi"
 }
 
 def segment_view(request):
