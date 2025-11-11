@@ -171,7 +171,6 @@ def segment_view(request):
  
 APOSTROPHES = "[’'’‘ʼʻʹʽ′`ˈ]"
 
-
 def highlight_matches(request):
     highlighted_text = ''
     detected_words = []
@@ -181,11 +180,15 @@ def highlight_matches(request):
         patterns = Patterns.objects.values_list('word', flat=True)
 
         for pattern in patterns:
-            regex_pattern = re.sub("'", APOSTROPHES, pattern)
-            regex = re.compile(r'\b{}\b'.format(regex_pattern), flags=re.IGNORECASE)
+            # Patterndagi apostroflarni turli belgilar bilan moslash
+            pattern_regex = re.sub("['’‘ʼʻʹʽ′`ˈ]", APOSTROPHES, pattern)
+            
+            # Case-insensitive substring match
+            regex = re.compile(pattern_regex, flags=re.IGNORECASE)
 
             if re.search(regex, input_text):
                 detected_words.append(pattern)
+                # Matnda highlight qilish
                 input_text = re.sub(regex, r'<mark>\g<0></mark>', input_text)
 
         highlighted_text = input_text
@@ -197,4 +200,5 @@ def highlight_matches(request):
         'detected_words': detected_words,
         'patterns': all_patterns
     }
+
     return render(request, 'analyze.html', context)
