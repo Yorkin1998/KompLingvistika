@@ -13,6 +13,9 @@ import re
 
 APOSTROPHES = "[’‘ʼʻʹʽ′`ˈ]"
 
+for i in PATTERNS:
+    Patterns.objects.create(word = i)
+
 # Barcha patternlarni olib, tekshirib o'zgartirish
 for pattern in Patterns.objects.all():
     if re.search(APOSTROPHES, pattern.word):
@@ -21,3 +24,4 @@ for pattern in Patterns.objects.all():
         pattern.word = new_word
         pattern.save()  # o'zgartirishlarni saqlaymiz
         print(f"Updated: {new_word}")
+
