@@ -1,8 +1,8 @@
 from django.urls import path
-from .views import segment_view, analyze_view
+from .views import segment_view, highlight_matches
 
 urlpatterns = [
     path("", segment_view, name="segment"),
-    path('highlight/', analyze_view, name='analyze_view'),
+    path('highlight/', highlight_matches, name='highlight_matches'),
 ]
 
