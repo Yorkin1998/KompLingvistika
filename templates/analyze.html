@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <title>Matn tahlili</title>
+    <link rel="stylesheet" href="{% static 'bootstrap.min.css' %}">
+    <style>
+        body { background: #f7f7fb; padding: 40px; }
+        .container { max-width: 700px; margin: auto; }
+        .result-box {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        u {
+            text-decoration: underline solid #007bff 2px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div align="center">
+    <a class="btn btn-success" href="{% url 'segment' %}">Birinchi taskga o'tish 👈</a>
+</div>
+<div class="container">
+    <h2 class="mb-4 text-center">🧠 IT terminlarini aniqlash tizimi</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.text }}
+        </div>
+        <button class="btn btn-primary w-100" type="submit">Tahlil qilish</button>
+    </form>
+
+    {% if highlighted_text %}
+        <div class="result-box mt-4">
+            <h5>Natija:</h5>
+            <p style="white-space: pre-wrap;">{{ highlighted_text|safe }}</p>
+        </div>
+    {% endif %}
+</div>
+
+</body>
+</html>
