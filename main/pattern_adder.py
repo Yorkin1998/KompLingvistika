@@ -1,0 +1,23 @@
+import os
+import django
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+os.sys.path.append(BASE_DIR)
+os.environ['DJANGO_SETTINGS_MODULE'] = 'core.settings'
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
+django.setup()
+
+from main.tests import PATTERNS
+from main.models import Patterns
+import re
+
+APOSTROPHES = "[’‘ʼʻʹʽ′`ˈ]"
+
+# Barcha patternlarni olib, tekshirib o'zgartirish
+for pattern in Patterns.objects.all():
+    if re.search(APOSTROPHES, pattern.word):
+        # apostroflarni standart ' bilan almashtiramiz
+        new_word = re.sub(APOSTROPHES, "'", pattern.word)
+        pattern.word = new_word
+        pattern.save()  # o'zgartirishlarni saqlaymiz
+        print(f"Updated: {new_word}")

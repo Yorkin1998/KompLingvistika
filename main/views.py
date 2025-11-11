@@ -4,7 +4,7 @@ from django import forms
 from .tests import highlight_text, PATTERNS
 from os.path import exists
 
-from .models import UzWord, UmumiyTurkum, SIFAT
+from .models import UzWord, UmumiyTurkum, Patterns
 from .tests import SUFFIXES,BASE_WORDS, predict, generate_dataset, train_model
 
 import tempfile
@@ -168,29 +168,33 @@ def segment_view(request):
         "bazadagi": BASE_WORDS,
         "qoshimcha": SUFFIX_TYPES,
     })
+ 
+APOSTROPHES = "[’'’‘ʼʻʹʽ′`ˈ]"
 
-def highlight_matches(text):
-    result = text
-    for pattern in PATTERNS:
-        regex = re.compile(re.escape(pattern), re.IGNORECASE)
-        result = regex.sub(
-            lambda m: f"<u>{m.group(0)}</u>",  # tagiga chizish uchun <u>...</u>
-            result
-        )
-    return result
 
-def analyze_view(request):
-    highlighted_text = None
+def highlight_matches(request):
+    highlighted_text = ''
+    detected_words = []
 
     if request.method == 'POST':
-        form = TextAnalyzeForm(request.POST)
-        if form.is_valid():
-            text = form.cleaned_data['text']
-            highlighted_text = highlight_matches(text)
-    else:
-        form = TextAnalyzeForm()
+        input_text = request.POST.get('input_text', '')
+        patterns = Patterns.objects.values_list('word', flat=True)
 
-    return render(request, 'analyze.html', {
-        'form': form,
-        'highlighted_text': highlighted_text
-    })
+        for pattern in patterns:
+            regex_pattern = re.sub("'", APOSTROPHES, pattern)
+            regex = re.compile(r'\b{}\b'.format(regex_pattern), flags=re.IGNORECASE)
+
+            if re.search(regex, input_text):
+                detected_words.append(pattern)
+                input_text = re.sub(regex, r'<mark>\g<0></mark>', input_text)
+
+        highlighted_text = input_text
+
+    all_patterns = Patterns.objects.all()
+
+    context = {
+        'highlighted_text': highlighted_text,
+        'detected_words': detected_words,
+        'patterns': all_patterns
+    }
+    return render(request, 'analyze.html', context)

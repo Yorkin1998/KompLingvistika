@@ -44,3 +44,10 @@ class UmumiyTurkum(models.Model):
 
     def __str__(self):
         return self.word
+
+class Patterns(models.Model):
+
+    word = models.CharField(max_length=45,)
+
+    def __str__(self):
+        return self.word
