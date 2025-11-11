@@ -15,9 +15,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 
 from django.shortcuts import render
-from .forms import TextAnalyzeForm
 import re
-import html
 
 def add_new_word(word):
     UzWord.objects.create(
@@ -44,9 +42,7 @@ def parse_word_classes(result_html):
 
 SUFFIX_TYPES = {
     "lar": "ko‘plik qo‘shimchasi",
-    "lari": "egalik qo‘shimchasi (3-shaxs)",
     "miz": "egalik qo‘shimchasi (1-shaxs ko‘plik)",
-    "imiz": "egalik qo‘shimchasi (1-shaxs ko‘plik)",
     "ingiz": "egalik qo‘shimchasi (2-shaxs hurmat yoki ko‘plik)",
     "im": "egalik qo‘shimchasi (1-shaxs birlik)",
     "ing": "egalik qo‘shimchasi (2-shaxs birlik)",
@@ -66,6 +62,7 @@ SUFFIX_TYPES = {
     "gan": "fe’l sifatdosh qo‘shimchasi",
     "gach": "fe’l ravishdosh qo‘shimchasi (vaqt yoki shart bildiradi)",
 }
+APOSTROPHES = "[’'’‘ʼʻʹʽ′`ˈ]"
 
 def segment_view(request):
     if not exists("morph_model.pkl"):
@@ -169,8 +166,6 @@ def segment_view(request):
         "qoshimcha": SUFFIX_TYPES,
     })
  
-APOSTROPHES = "[’'’‘ʼʻʹʽ′`ˈ]"
-
 def highlight_matches(request):
     highlighted_text = ''
     detected_words = []
