@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.core.cache import cache
-
+from django import forms
+from .tests import highlight_text, PATTERNS
 from os.path import exists
 
 from .models import UzWord, UmumiyTurkum, SIFAT
@@ -12,6 +13,11 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
+
+from django.shortcuts import render
+from .forms import TextAnalyzeForm
+import re
+import html
 
 def add_new_word(word):
     UzWord.objects.create(
@@ -161,4 +167,30 @@ def segment_view(request):
         "word_class": word_class_final,
         "bazadagi": BASE_WORDS,
         "qoshimcha": SUFFIX_TYPES,
+    })
+
+def highlight_matches(text):
+    result = text
+    for pattern in PATTERNS:
+        regex = re.compile(re.escape(pattern), re.IGNORECASE)
+        result = regex.sub(
+            lambda m: f"<u>{m.group(0)}</u>",  # tagiga chizish uchun <u>...</u>
+            result
+        )
+    return result
+
+def analyze_view(request):
+    highlighted_text = None
+
+    if request.method == 'POST':
+        form = TextAnalyzeForm(request.POST)
+        if form.is_valid():
+            text = form.cleaned_data['text']
+            highlighted_text = highlight_matches(text)
+    else:
+        form = TextAnalyzeForm()
+
+    return render(request, 'analyze.html', {
+        'form': form,
+        'highlighted_text': highlighted_text
     })

@@ -2,6 +2,8 @@ import csv
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB
 import joblib
+import re
+import html
 
 BASE_WORDS = [
     "kitob", "uy", "dost", "bola", "qiz", "oqituvchi", "maktab", "daraxt", "ota", "ona",
@@ -117,19 +119,151 @@ def predict(word, model_file="morph_model.pkl"):
 
 
 
-# if __name__ == "__main__":
-#     # Agar model mavjud bo'lmasa, yangidan quriladi
-#     if not os.path.exists("morph_model.pkl"):
-#         generate_dataset()
-#         train_model()
 
-#     while True:
-#         word = input("So'z kiriting (chiqish uchun 'exit'): ")
-#         if word == "exit":
-#             break
-#         root, suffixes = predict(word)
-#         print(f"Asos: {root}")
-#         if suffixes:
-#             print("Qo'shimchalar:", " ".join(suffixes))
-#         else:
-#             print("Qo'shimcha yo'q")
+PATTERNS = [
+"Axborot texnologiyalari",
+"Sun'iy intellekt",
+"Ma'lumotlar bazasi",
+"Kompyuter tarmoqlari",
+"Bulutli hisoblash",
+"Dasturiy ta’minot",
+"Operatsion tizim",
+"Ma’lumotlarni qayta ishlash",
+"Kiberxavfsizlik",
+"Axborot tizimi",
+"Veb-ilova",
+"Ma’lumotlarni saqlash",
+"Sun’iy neyron tarmoq",
+"Ma’lumotlar tahlili",
+"Katta ma’lumotlar (Big Data)",
+"Raqamli transformatsiya",
+"Ma’lumotlarni vizualizatsiya qilish",
+"Robototexnika",
+"Internet of Things (IoT)",
+"Mobil ilovalar",
+"Ma’lumotlarni uzatish",
+"Bulutli xizmatlar",
+"Kriptovalyuta texnologiyasi",
+"Blokcheyn",
+"Shifrlash algoritmi",
+"Ma’lumotlarni tiklash",
+"Ma’lumotlar xavfsizligi",
+"Sun’iy ong",
+"Kompyuter grafikasi",
+"Virtual reallik",
+"Kengaytirilgan reallik",
+"Dasturlash tillari",
+"Ma’lumotlar oqimi",
+"Tarmoq protokollari",
+"Internet xavfsizligi",
+"Ma’lumotlarni qayta ishlash tizimi",
+"Axborot tizimi menejmenti",
+"Server infratuzilmasi",
+"Veb-sayt dizayni",
+"Ma’lumotlar bazasi boshqaruvi",
+"Mashina o‘rganish",
+"Algoritmik tahlil",
+"Sun’iy intellekt tizimi",
+"Dasturiy modul",
+"Elektron tijorat",
+"Raqamli marketing",
+"Ma’lumotlar arxivi",
+"Server xotirasi",
+"Kompyuter tarmog‘i",
+"Ma’lumotlarni kodlash",
+"Internet ilovalari",
+"Mobil texnologiyalar",
+"Kompyuter tizimi",
+"Bulutli server",
+"Raqamli axborot",
+"Ma’lumotlarni optimizatsiya qilish",
+"Ma’lumotlarni himoya qilish",
+"Veb-server",
+"Tarmoq xavfsizligi",
+"Elektron pochta tizimi",
+"Dasturiy platforma",
+"Sun’iy intellekt algoritmlari",
+"Ma’lumotlarni indekslash",
+"Ma’lumotlarni tozalash",
+"Internet protokoli",
+"Kompyuter tahlili",
+"Axborot oqimi",
+"Kompyuter arxitekturasi",
+"Raqamli tizim",
+"Ma’lumotlar tahlilchisi",
+"Sun’iy neyron algoritmi",
+"Elektron ma’lumotlar",
+"Dasturiy interfeys",
+"Veb-dastur",
+"Kompyuter xavfsizligi",
+"Ma’lumotlar zaxirasi",
+"Raqamli kommunikatsiya",
+"Server konfiguratsiyasi",
+"Ma’lumotlarni avtomatlashtirish",
+"Kompyuter dasturi",
+"Tarmoq monitoringi",
+"Axborot texnologiyalari menejmenti",
+"Ma’lumotlarni qayta ishlash texnologiyasi",
+"Internet tarmog‘i",
+"Sun’iy intellekt platformasi",
+"Ma’lumotlarni vizualizatsiya qilish vositasi",
+"Kompyuter tizimlari integratsiyasi",
+"Raqamli texnologiyalar",
+"Bulutli platforma",
+"Ma’lumotlarni yig‘ish",
+"Ma’lumotlarni tahlil qilish vositasi",
+"Tarmoq serveri",
+"Dasturiy ta’minot yechimi",
+"Sun’iy intellekt modeli",
+"Ma’lumotlar oqimi tahlili",
+"Internet ilovalarining xavfsizligi",
+"Kompyuter infratuzilmasi",
+"Axborot xavfsizligi protokoli",
+"Ma’lumotlarni saqlash tizimi",
+"Raqamli transformatsiya strategiyasi",
+]
+
+
+import re
+import html
+
+# Barcha turdagi apostrof belgilar
+APOSTROPHES = "['’‘ʼʻʹʽ′`ˈ]"
+
+def normalize_pattern(p):
+    p = p.lower()
+    p = re.sub(APOSTROPHES, "'", p)
+    p = p.replace("-", " ")
+    return p
+
+def build_flexible_regex(pattern):
+    """
+    "Sun’iy intellekt" => flexible regex
+    Sun[apostrof, defis, probel]*iy[\s'\-’]*intellekt[a-zA-Zа-яА-Яʼ‘’'`\-]*
+    """
+    pattern_norm = normalize_pattern(pattern)
+    parts = pattern_norm.split()
+    if len(parts) > 1:
+        # bir necha so'z bo'lsa ularni bo'shliq, defis yoki apostrof orqali bog'lash
+        regex = rf"(?:[\s{APOSTROPHES}\-])*".join(map(re.escape, parts))
+    else:
+        regex = re.escape(parts[0])
+    # So'ngida qo‘shimchalar uchun (o‘zbekcha, ruscha) harflar
+    regex += r"[a-zA-Zа-яА-Яʼ‘’'`\-]*"
+    return regex
+
+def highlight_text(text, patterns):
+    if not text:
+        return ""
+
+    safe = html.escape(text)
+    regexes = [build_flexible_regex(p) for p in sorted(patterns, key=len, reverse=True)]
+    combined = "|".join(regexes)
+    # (?iu): case-insensitive + Unicode aware
+    regex = re.compile(r"(?iu)\b(" + combined + r")\b")
+
+    def repl(m):
+        return f'<span class="highlight">{m.group(0)}</span>'
+
+    highlighted = regex.sub(repl, safe)
+    return highlighted
