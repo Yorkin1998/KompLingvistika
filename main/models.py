@@ -47,6 +47,12 @@ class UmumiyTurkum(models.Model):
 
 class Patterns(models.Model):
 
+    TYPE_OF_PATTERNS = (
+        ('1', 'TEXNIK IBORALAR'),
+        ('2', 'MEDITSINA IBORALAR'),
+        ('3', 'FILOLOGIK IBORALAR')
+    )
+    type_of_these = models.CharField(max_length=1, choices=TYPE_OF_PATTERNS, null=True, blank=True)
     word = models.CharField(max_length=45,)
 
     def __str__(self):

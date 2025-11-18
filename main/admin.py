@@ -11,4 +11,20 @@ class UmumiyTurkumadmin(admin.ModelAdmin):
     search_fields = ['word']
     list_filter = ['type_is',]
 
-admin.site.register(Patterns)
+@admin.register(Patterns)
+class PatternsAdmin(admin.ModelAdmin):
+    # Ko‘rinadigan ustunlar
+    list_display = ('word', 'type_of_these')
+    
+    # Filter qo‘shish
+    list_filter = ('type_of_these',)
+    
+    # Qidiruv uchun
+    search_fields = ('word',)
+    
+    # Formdagi joylashtirish (ixtiyoriy)
+    fieldsets = (
+        (None, {
+            'fields': ('word', 'type_of_these')
+        }),
+    )

@@ -7,14 +7,17 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'core.settings'
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
 django.setup()
 
-from main.tests import PATTERNS
+from main.tests import PATTERNS, medical_phrases, linguistic_phrases
 from main.models import Patterns
 import re
 
 APOSTROPHES = "[’‘ʼʻʹʽ′`ˈ]"
 
-for i in PATTERNS:
-    Patterns.objects.create(word = i)
+for i in medical_phrases:
+    Patterns.objects.create(word = i, type_of_these = '2')
+
+for i in linguistic_phrases:
+    Patterns.objects.create(word = i, type_of_these = '3')
 
 # Barcha patternlarni olib, tekshirib o'zgartirish
 for pattern in Patterns.objects.all():

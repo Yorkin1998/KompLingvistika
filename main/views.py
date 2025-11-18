@@ -208,25 +208,48 @@ def segment_view(request):
         "qoshimcha": SUFFIX_TYPES,
     })
  
+# Ranglar har bir type_of_these uchun
+HIGHLIGHT_COLORS = {
+    '1': '#ffadad',  # Texnik - qizil rang
+    '2': '#caffbf',  # Meditsina - yashil
+    '3': '#9bf6ff',  # Filologik - ko‘k
+}
+
+TYPE_LABELS = {
+    '1': 'Texnik ibora',
+    '2': 'Meditsina ibora',
+    '3': 'Filologik ibora',
+}
+
+
 def highlight_matches(request):
     highlighted_text = ''
     detected_words = []
 
     if request.method == 'POST':
         input_text = request.POST.get('input_text', '')
-        patterns = Patterns.objects.values_list('word', flat=True)
+        patterns = Patterns.objects.all()  # word + type_of_these
 
-        for pattern in patterns:
-            # Patterndagi apostroflarni turli belgilar bilan moslash
-            pattern_regex = re.sub("['’‘ʼʻʹʽ′`ˈ]", APOSTROPHES, pattern)
-            
-            # Case-insensitive substring match
+        for pattern_obj in patterns:
+            word = pattern_obj.word
+            type_of = pattern_obj.type_of_these
+
+            # Apostroflarni turli belgilar bilan moslash
+            pattern_regex = re.sub("['’‘ʼʻʹʽ′`ˈ]", APOSTROPHES, word)
+
             regex = re.compile(pattern_regex, flags=re.IGNORECASE)
 
             if re.search(regex, input_text):
-                detected_words.append(pattern)
-                # Matnda highlight qilish
-                input_text = re.sub(regex, r'<mark>\g<0></mark>', input_text)
+                detected_words.append(word)
+                color = HIGHLIGHT_COLORS.get(type_of, '#ffff00')  # default yellow
+                label = TYPE_LABELS.get(type_of, 'Predmet ibora')
+
+                # Highlight qilish va tooltip qo‘yish
+                input_text = re.sub(
+                    regex,
+                    rf'<mark style="background-color:{color};" title="{label}">\g<0></mark>',
+                    input_text
+                )
 
         highlighted_text = input_text
 
