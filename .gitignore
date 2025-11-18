@@ -137,3 +137,6 @@ cython_debug/
 #db.sqlite3
 .vscode/
 .idea/
+*.pkl
+morph_model.pkl
+models/
