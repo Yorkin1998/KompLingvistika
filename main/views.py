@@ -42,25 +42,68 @@ def parse_word_classes(result_html):
 
 SUFFIX_TYPES = {
     "lar": "ko‘plik qo‘shimchasi",
-    "miz": "egalik qo‘shimchasi (1-shaxs ko‘plik)",
-    "ingiz": "egalik qo‘shimchasi (2-shaxs hurmat yoki ko‘plik)",
-    "im": "egalik qo‘shimchasi (1-shaxs birlik)",
-    "ing": "egalik qo‘shimchasi (2-shaxs birlik)",
-    "i": "egalik qo‘shimchasi (3-shaxs)",
-    "ni": "tushum kelishigi qo‘shimchasi",
-    "ga": "yo‘nalish kelishigi qo‘shimchasi",
-    "da": "joy kelishigi qo‘shimchasi",
-    "dan": "chiqish kelishigi qo‘shimchasi",
-    "ning": "qaratqich kelishigi qo‘shimchasi",
-    "man": "fe’l shaxs-son qo‘shimchasi (1-shaxs birlik)",
-    "san": "fe’l shaxs-son qo‘shimchasi (2-shaxs birlik)",
-    "siz": "fe’l shaxs-son qo‘shimchasi (2-shaxs hurmat yoki ko‘plik)",
-    "di": "fe’l o‘tgan zamon qo‘shimchasi (3-shaxs)",
-    "dim": "fe’l o‘tgan zamon qo‘shimchasi (1-shaxs birlik)",
-    "ding": "fe’l o‘tgan zamon qo‘shimchasi (2-shaxs birlik)",
-    "dik": "fe’l o‘tgan zamon qo‘shimchasi (1-shaxs ko‘plik)",
-    "gan": "fe’l sifatdosh qo‘shimchasi",
-    "gach": "fe’l ravishdosh qo‘shimchasi (vaqt yoki shart bildiradi)",
+
+    "im": "egalik (1-shaxs birlik)",
+    "ing": "egalik (2-shaxs birlik)",
+    "i": "egalik (3-shaxs)",
+    "si": "egalik 3-shaxs variant",
+
+    "miz": "egalik (1-shaxs ko‘plik)",
+    "ngiz": "egalik (2-shaxs ko‘plik yoki hurmat)",
+
+    "ni": "tushum kelishigi",
+    "ga": "yo‘nalish kelishigi",
+    "qa": "yo‘nalish fonetik variant",
+    "da": "joy kelishigi",
+    "ta": "joy kelishigi fonetik variant",
+    "dan": "chiqish kelishigi",
+    "tan": "chiqish fonetik variant",
+    "ning": "qaratqich kelishigi",
+    "ningdan": "birikma ko‘rinishi",
+
+    "di": "o‘tgan zamon (3-shaxs)",
+    "dim": "o‘tgan zamon (1-shaxs birlik)",
+    "ding": "o‘tgan zamon (2-shaxs birlik)",
+    "dik": "o‘tgan zamon (1-shaxs ko‘plik)",
+    "gan": "sifatdosh",
+    "man": "tasdiq",
+
+    "yapti": "hozirgi zamon davom (3-shaxs)",
+    "yapman": "hozirgi zamon davom (1-shaxs)",
+    "yapsan": "hozirgi zamon davom (2-shaxs)",
+    "yapmiz": "hozirgi zamon davom (1-shaxs ko‘plik)",
+    "yapsiz": "hozirgi zamon davom (hurmat)",
+
+    "adi": "kelasi zamon taxminiy",
+    "arman": "kelasi zamon ehtimol (1-shaxs)",
+    "arsan": "kelasi zamon ehtimol (2-shaxs)",
+    "adi": "kelasi zamon (3-shaxs)",
+    "ajak": "kelasi zamon (qadimiy/kitobiy)",
+
+    "man": "1-shaxs birlik",
+    "san": "2-shaxs birlik",
+    "miz": "1-shaxs ko‘plik",
+    "siz": "2-shaxs hurmat/ko‘plik",
+    "lar": "3-shaxs ko‘plik hurmat",
+
+    "ma": "bo‘lishsizlik",
+    "mas": "bo‘lishsizlik (kelasi zamon/reja)",
+    "may": "bo‘lishsizlik (hozirgi zamon)",
+    "masa": "shart mayli bo‘lishsizlik",
+
+    "gin": "iliy buyruq miniatyur shakl",
+    "ing": "hurmatli buyruq",
+    "sin": "3-shaxs buyruq",
+    "aylik": "1-shaxs ko‘plik buyruq",
+
+    "chi": "kasb, nisbat (haydovchi, o‘qituvchi)",
+    "lik": "sifat/ot yasovchi (yaxshilik, do‘stlik)",
+    "kor": "xususiyat bildiradi (shodkor, uddaburon)",
+    "dor": "egalik/sohiblik (ilm-dor)",
+    "li": "sifat yasovchi (uyli, belgilangan)",
+    "siz": "inkor/yo‘qlik (uy-siz, imkon-siz)",
+    "ona": "nisbat, ayollik (kuyovona)",
+    "vchi": "fe’llardan ot yasalishi",
 }
 APOSTROPHES = "[’'’‘ʼʻʹʽ′`ˈ]"
 
@@ -77,7 +120,6 @@ def segment_view(request):
     if request.method == "POST":
         word = request.POST.get("word")
         if word:
-            # 1️⃣ Avvalo, ildizni aniqlash uchun predict ishlaydi (suffixlar har doim kerak)
             root, found_suffixes = predict(word)
             if found_suffixes:
                 for s in found_suffixes:
